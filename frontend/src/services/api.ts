@@ -1,18 +1,33 @@
 import { Stats, User, ChartDataPoint, PlanDistribution } from '@/types';
 
-const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 export const api = {
   /** Login */
-  async postLogin(name: string, password: string): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`);
-    if (!response.ok) throw new Error('Failed to login');
+  async postLogin(email: string, password: string): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to login');
+    }
     return response.json();
   },
 
   /** Register */
-  async postRegister(name: string, password: string, email: string): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/auth/register`);
-    if (!response.ok) throw new Error('Failed to login');
+  async postRegister(name: string, email: string, password: string): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/users/createUser`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to register');
+    }
     return response.json();
   },
 

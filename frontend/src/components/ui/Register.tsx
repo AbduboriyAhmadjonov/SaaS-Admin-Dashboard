@@ -1,20 +1,28 @@
+import { useRegister } from '@/hooks/useApi';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
-interface RegisterProps {
-  onRegister: () => void;
-}
-
-export default function Register({ onRegister }: RegisterProps) {
+export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const registerMutation = useRegister();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Replace with API registration
-    if (name && email && password) {
-      onRegister(); // set auth state to true
+    try {
+      const user = await registerMutation.mutateAsync({ name, email, password });
+      if (user) {
+        navigate('/');
+      }
+    } catch (err) {
+      {
+        registerMutation.isError && (
+          <p className="text-red-500 text-sm mt-2">{(registerMutation.error as Error).message}</p>
+        );
+      }
     }
   };
 
@@ -22,6 +30,7 @@ export default function Register({ onRegister }: RegisterProps) {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80">
         <h2 className="text-xl font-semibold mb-4">Register</h2>
+
         <input
           type="text"
           placeholder="Full Name"
@@ -43,12 +52,22 @@ export default function Register({ onRegister }: RegisterProps) {
           onChange={(e) => setPassword(e.target.value)}
           className="border w-full p-2 mb-3"
         />
+
         <button
           type="submit"
-          className="bg-green-500 text-white px-4 py-2 w-full rounded hover:bg-green-600"
+          disabled={!email && !password ? true : false}
+          className={`bg-green-500 text-white mt-2 px-4 py-2 w-full rounded ${
+            !email || !password ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-300'
+          }`}
+          // className="bg-green-500 text-white px-4 py-2 w-full rounded hover:bg-green-600 disabled:bg-green-300"
         >
-          Create Account
+          {registerMutation.isPending ? 'Creating...' : 'Create Account'}
         </button>
+
+        {registerMutation.isError && (
+          <p className="text-red-500 mt-2">{(registerMutation.error as Error).message}</p>
+        )}
+
         <p className="text-sm text-gray-600 mt-4 text-center">
           Already have an account?{' '}
           <Link to="/login" className="text-blue-500 hover:underline">

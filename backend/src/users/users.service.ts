@@ -15,13 +15,20 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const bcryptSalt = this.configService.get<number>('bcrypt.saltRounds') ?? 10;
+
     const { email, password, name } = createUserDto;
+
     const existing = await this.userModel.findOne({ email });
     if (existing) {
       throw new UnauthorizedException('Email already in use');
     }
+
     const hashedPassword = await bcrypt.hash(password, bcryptSalt);
-    const createdUser = new this.userModel({ email, hashedPassword, name });
+    const createdUser = new this.userModel({
+      email,
+      password: hashedPassword,
+      name,
+    });
     return createdUser.save();
   }
 
@@ -30,6 +37,6 @@ export class UsersService {
   }
 
   async deleteAll() {
-    return await this.userModel.deleteMany({});
+    return this.userModel.deleteMany({});
   }
 }

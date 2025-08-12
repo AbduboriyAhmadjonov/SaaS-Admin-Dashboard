@@ -1,21 +1,26 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLogin } from '@/hooks/useApi';
 
-interface LoginProps {
-  onLogin: () => void;
-}
-
-export default function Login({ onLogin }: LoginProps) {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const loginMutation = useLogin();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Replace with API authentication
-    if (email && password) {
-      onLogin(); // set auth state to true
-      navigate('/');
+    try {
+      const user = await loginMutation.mutateAsync({ email, password });
+      if (user) {
+        navigate('/');
+      }
+    } catch (err) {
+      {
+        loginMutation.isError && (
+          <p className="text-red-500 text-sm mt-2">{(loginMutation.error as Error).message}</p>
+        );
+      }
     }
   };
 
@@ -37,17 +42,14 @@ export default function Login({ onLogin }: LoginProps) {
           onChange={(e) => setPassword(e.target.value)}
           className="border w-full p-2 mb-3"
         />
-        <span className="select-none text-m">
-          <input type="checkbox" name="remember" id="remember" />
-          <label className="p-2 mb-3" htmlFor="remember">
-            Remember me
-          </label>
-        </span>
         <button
           type="submit"
-          className="bg-blue-500 text-white mt-2 px-4 py-2 w-full rounded hover:bg-blue-600"
+          disabled={!email && !password ? true : false}
+          className={`bg-blue-500 text-white mt-2 px-4 py-2 w-full rounded ${
+            !email || !password ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+          }`}
         >
-          Login
+          {loginMutation.isPending ? 'Logging in...' : 'Login'}
         </button>
         <p className="text-sm text-gray-600 mt-4 text-center">
           Create an account?{' '}

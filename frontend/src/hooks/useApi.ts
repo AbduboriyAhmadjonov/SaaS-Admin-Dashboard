@@ -1,19 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '@/services/api';
 
 /** Login */
-export const useLogin = (email: string, password: string) => {
-  return useQuery({
-    queryKey: ['login'],
-    queryFn: () => api.postLogin(email, password),
+export const useLogin = () => {
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      api.postLogin(email, password),
   });
 };
 
 /** Register */
-export const useRegister = (name: string, password: string, email: string) => {
-  return useQuery({
-    queryKey: ['login'],
-    queryFn: () => api.postRegister(name, email, password),
+export const useRegister = () => {
+  return useMutation({
+    mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
+      api.postRegister(name, email, password),
   });
 };
 
