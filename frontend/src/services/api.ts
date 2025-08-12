@@ -1,7 +1,21 @@
 import { Stats, User, ChartDataPoint, PlanDistribution } from '@/types';
 
-const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/';
 export const api = {
+  /** Login */
+  async postLogin(name: string, password: string): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/auth/login`);
+    if (!response.ok) throw new Error('Failed to login');
+    return response.json();
+  },
+
+  /** Register */
+  async postRegister(name: string, password: string, email: string): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/auth/register`);
+    if (!response.ok) throw new Error('Failed to login');
+    return response.json();
+  },
+
   async getStats(): Promise<Stats> {
     const response = await fetch(`${API_BASE_URL}/stats`);
     if (!response.ok) throw new Error('Failed to fetch stats');

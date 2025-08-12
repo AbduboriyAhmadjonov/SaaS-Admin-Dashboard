@@ -4,6 +4,7 @@ export interface User {
   email: string;
   status: 'Active' | 'Inactive';
   plan: 'Basic' | 'Pro' | 'Enterprise';
+  role: 'User' | 'Admin' | 'Super Admin';
 }
 
 export interface Stats {

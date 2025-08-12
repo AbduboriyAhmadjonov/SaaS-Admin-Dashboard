@@ -1,6 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
 
+/** Login */
+export const useLogin = (email: string, password: string) => {
+  return useQuery({
+    queryKey: ['login'],
+    queryFn: () => api.postLogin(email, password),
+  });
+};
+
+/** Register */
+export const useRegister = (name: string, password: string, email: string) => {
+  return useQuery({
+    queryKey: ['login'],
+    queryFn: () => api.postRegister(name, email, password),
+  });
+};
+
 export const useStats = () => {
   return useQuery({
     queryKey: ['stats'],
