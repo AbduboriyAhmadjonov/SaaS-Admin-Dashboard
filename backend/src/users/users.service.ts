@@ -4,32 +4,36 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private configService: ConfigService,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const bcryptSalt = this.configService.get<number>('bcrypt.saltRounds') ?? 10;
+    const { email, password } = createUserDto;
 
-    const { email, password, name } = createUserDto;
-
-    const existing = await this.userModel.findOne({ email });
-    if (existing) {
+    const isExist = await this.userModel.findOne({ email });
+    if (isExist) {
       throw new UnauthorizedException('Email already in use');
     }
 
-    const hashedPassword = await bcrypt.hash(password, bcryptSalt);
-    const createdUser = new this.userModel({
-      email,
-      password: hashedPassword,
-      name,
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new this.userModel({
+      ...createUserDto,
+      password: hashedPassword, // Use the hashed password
     });
-    return createdUser.save();
+
+    console.log('newUser password (hashed): ' + hashedPassword);
+    return newUser.save();
+  }
+
+  async findBySomething(field: string, value: string): Promise<UserDocument> {
+    console.log(`Searching for user by ${field} = ${value}`);
+    const user = await this.userModel.findOne({ [field]: value }).exec();
+    if (!user) throw new Error(`Cannot find a user with ${field}: ${value}`);
+    console.log('User found:', user);
+    return user;
   }
 
   async findAll(): Promise<User[]> {
@@ -38,5 +42,9 @@ export class UsersService {
 
   async deleteAll() {
     return this.userModel.deleteMany({});
+  }
+
+  async removeTokens(userId, sessionId) {
+    return this.userModel.updateOne({ _id: userId }, { $pull: { sessions: { sessionId } } });
   }
 }

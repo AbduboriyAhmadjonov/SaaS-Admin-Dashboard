@@ -12,6 +12,11 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Post('/findByEmail')
+  async findByEmail(@Body() email: string): Promise<User> {
+    return this.findByEmail(email);
+  }
+
   @Get('/findAll')
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();

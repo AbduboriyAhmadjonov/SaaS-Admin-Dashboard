@@ -4,10 +4,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 
 export const api = {
   /** Login */
-  async postLogin(email: string, password: string): Promise<User> {
+  async postLogin(
+    email: string,
+    password: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
     if (!response.ok) {
@@ -19,6 +23,8 @@ export const api = {
 
   /** Register */
   async postRegister(name: string, email: string, password: string): Promise<User> {
+    console.log(name);
+
     const response = await fetch(`${API_BASE_URL}/users/createUser`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -29,6 +35,15 @@ export const api = {
       throw new Error(errorData.message || 'Failed to register');
     }
     return response.json();
+  },
+
+  async refreshAccessToken(): Promise<{ accessToken: string }> {
+    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include', // 👈 send stored refresh token cookie
+    });
+    if (!res.ok) throw new Error('Failed to refresh token');
+    return res.json();
   },
 
   async getStats(): Promise<Stats> {

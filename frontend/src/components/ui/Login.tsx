@@ -2,19 +2,21 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLogin } from '@/hooks/useApi';
 
-export default function Login() {
+export default function Login({ setAccessToken }: { setAccessToken: (token: string) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const loginMutation = useLogin();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const user = await loginMutation.mutateAsync({ email, password });
-      if (user) {
-        navigate('/');
+      const tokens = await loginMutation.mutateAsync({ email, password });
+      setAccessToken(tokens.accessToken);
+      if (!tokens) {
+        throw new Error('Setting tokens failed');
       }
+      navigate('/');
     } catch (err) {
       {
         loginMutation.isError && (
@@ -26,7 +28,7 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80">
+      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow w-80">
         <h2 className="text-xl font-semibold mb-4">Login</h2>
         <input
           type="email"

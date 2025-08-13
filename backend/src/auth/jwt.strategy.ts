@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
-    const jwtSecret = configService.get<string>('jwt.jwtConstants');
+    const jwtSecret = configService.get<string>('jwt.accessSecret');
 
     if (!jwtSecret) {
       throw new Error('JWT secret is not defined in configuration');

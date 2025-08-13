@@ -10,25 +10,21 @@ export default function Register() {
   const registerMutation = useRegister();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const user = await registerMutation.mutateAsync({ name, email, password });
-      if (user) {
-        navigate('/');
-      }
+      await registerMutation.mutateAsync({ name, email, password });
+      alert('Registered successfully');
+      navigate('/login'); // better UX: redirect to login
     } catch (err) {
-      {
-        registerMutation.isError && (
-          <p className="text-red-500 text-sm mt-2">{(registerMutation.error as Error).message}</p>
-        );
-      }
+      console.error(err);
+      alert((err as Error).message);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80">
+      <form onSubmit={handleRegister} className="bg-white p-6 rounded shadow w-80">
         <h2 className="text-xl font-semibold mb-4">Register</h2>
 
         <input
@@ -55,11 +51,10 @@ export default function Register() {
 
         <button
           type="submit"
-          disabled={!email && !password ? true : false}
+          disabled={!name || !email || !password}
           className={`bg-green-500 text-white mt-2 px-4 py-2 w-full rounded ${
-            !email || !password ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-300'
+            !name || !email || !password ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
           }`}
-          // className="bg-green-500 text-white px-4 py-2 w-full rounded hover:bg-green-600 disabled:bg-green-300"
         >
           {registerMutation.isPending ? 'Creating...' : 'Create Account'}
         </button>
