@@ -12,7 +12,7 @@ type HeaderProps = {
   setActiveTab: (tab: string) => void;
 };
 
-const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
+const Header: React.FC<HeaderProps> = ({ setActiveTab }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 

@@ -12,6 +12,7 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
     if (!response.ok) {
+      console.log('Error in postLogin');
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || 'Failed to login');
     }

@@ -13,8 +13,8 @@ class AuthStore {
         this.setToken(data.accessToken);
         return true;
       }
-    } catch {
-      // silent fail
+    } catch (error) {
+      console.log(error);
     }
 
     this.clearToken();

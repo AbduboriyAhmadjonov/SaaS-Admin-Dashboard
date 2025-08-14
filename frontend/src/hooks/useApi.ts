@@ -8,7 +8,7 @@ export const useLogin = () => {
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       api.postLogin(email, password),
     onSuccess: (data) => {
-      authStore.setToken(data.accessToken); // ✅ Extract the actual token string
+      authStore.setToken(data.accessToken);
     },
     onError: (error) => {
       console.log(error);

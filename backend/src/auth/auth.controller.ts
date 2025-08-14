@@ -43,8 +43,8 @@ export class AuthController {
 
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
-      secure: this.config.get<string>('node_env') === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
+      secure: false, // this.config.get<string>('node_env') === 'production'
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     });
 
