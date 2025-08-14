@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { authStore } from '../services/authStore';
 import { api } from '@/services/api';
 
 /** Login */
@@ -6,6 +7,12 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       api.postLogin(email, password),
+    onSuccess: (data) => {
+      authStore.setToken(data.accessToken); // ✅ Extract the actual token string
+    },
+    onError: (error) => {
+      console.log(error);
+    },
   });
 };
 

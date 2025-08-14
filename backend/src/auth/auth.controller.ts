@@ -8,6 +8,8 @@ import {
   Res,
   Req,
   UnauthorizedException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -31,7 +33,7 @@ export class AuthController {
     );
   }
 
-  @Post('login')
+  @Post('login') // Need to add csrf
   async login(
     @Body() body: { email: string; password: string },
     @Res({ passthrough: true }) res: Response,
@@ -52,6 +54,7 @@ export class AuthController {
   @Post('refresh')
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies['refresh_token'];
+    console.log(`refreshToken: ${refreshToken}`);
     if (!refreshToken) {
       throw new UnauthorizedException('No refresh token');
     }
@@ -63,7 +66,7 @@ export class AuthController {
     res.cookie('refresh_token', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -71,27 +74,22 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
   async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const userId = req.user['sub'];
-    const sessionId = req.cookies['session_id'];
+    const userId = req.user._id;
+    const refreshToken = req.cookies['refresh_token'];
 
-    if (!sessionId) {
-      throw new UnauthorizedException('No session found');
+    console.log('userId in auth.controller logout: ' + userId);
+    if (refreshToken) {
+      await this.authService.logout(refreshToken, userId); // Experimental
     }
-
-    await this.authService.removeSession(userId, sessionId);
-
-    // Clear cookies
     res.clearCookie('refresh_token');
-    res.clearCookie('session_id');
-
     return { message: 'Logged out successfully' };
   }
 
-  @UseGuards(AuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
+  // @UseGuards(AuthGuard)
+  // @Get('sessions')
+  // async getSessions(@Req() req: Request) {
+  //   return this.authService.getUserSessions(req.user._id);
+  // }
 }

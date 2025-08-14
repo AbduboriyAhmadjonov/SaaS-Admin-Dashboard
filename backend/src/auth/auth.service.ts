@@ -49,14 +49,10 @@ export class AuthService {
       expiresIn: this.config.get<string>('jwt.refreshExpiration'),
     });
 
-    const userWithoutToken = await this.usersService.findBySomething('email', user.email);
-    if (userWithoutToken.sessions.length === 0) {
-      userWithoutToken.sessions.push({
-        sessionId: `${Date.now()}-${refreshToken}`,
-        createdAt: new Date(),
-        refreshTokenHash: refreshToken,
-        lastUsedAt: new Date(),
-      });
+    const isAdded = await this.usersService.addRefreshToken(user._id, refreshToken);
+    if (!isAdded) {
+      console.log(`Something went wrong on addding refresh token to user: ${isAdded}`);
+      throw new UnauthorizedException('Not added');
     }
 
     return { accessToken, refreshToken };
@@ -68,13 +64,11 @@ export class AuthService {
         secret: this.config.get<string>('jwt.refreshSecret'),
       });
 
-      // Find user in DB (optional but recommended to ensure they still exist)
       const user = await this.usersService.findBySomething('email', payload.email);
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
 
-      // Generate new tokens
       const accessToken = this.jwtService.sign(
         { email: user.email, sub: user._id },
         {
@@ -97,7 +91,7 @@ export class AuthService {
     }
   }
 
-  async removeSession(_id: string, sessionId: string) {
+  async logout(_id: string, sessionId: string) {
     return this.usersService.removeTokens(_id, sessionId);
   }
 }

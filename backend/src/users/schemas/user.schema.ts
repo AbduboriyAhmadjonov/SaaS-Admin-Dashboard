@@ -29,12 +29,12 @@ export class User {
     ],
     default: [],
   })
-  sessions: {
+  sessions: Array<{
     sessionId: string;
     refreshTokenHash: string;
-    createdAt?: Date;
-    lastUsedAt?: Date;
-  }[];
+    createdAt: Date;
+    lastUsedAt: Date;
+  }>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

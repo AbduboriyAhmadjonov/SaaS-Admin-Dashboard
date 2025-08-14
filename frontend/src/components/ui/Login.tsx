@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLogin } from '@/hooks/useApi';
 
-export default function Login({ setAccessToken }: { setAccessToken: (token: string) => void }) {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -11,18 +11,10 @@ export default function Login({ setAccessToken }: { setAccessToken: (token: stri
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const tokens = await loginMutation.mutateAsync({ email, password });
-      setAccessToken(tokens.accessToken);
-      if (!tokens) {
-        throw new Error('Setting tokens failed');
-      }
+      await loginMutation.mutateAsync({ email, password });
       navigate('/');
     } catch (err) {
-      {
-        loginMutation.isError && (
-          <p className="text-red-500 text-sm mt-2">{(loginMutation.error as Error).message}</p>
-        );
-      }
+      throw new Error(`Login failed: ${err}`);
     }
   };
 
