@@ -9,20 +9,45 @@ import PrivateRoute from './components/PrivateRoute';
 import './index.css';
 import { useEffect, useState } from 'react';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        // Don't retry on 401 errors
+        if (error?.status === 401) return false;
+        return failureCount < 3;
+      },
+    },
+  },
+});
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
-    authStore
-      .initializeAuth()
-      .then(setIsAuthenticated)
-      .finally(() => setIsLoading(false));
+    const initAuth = async () => {
+      try {
+        const isAuthenticated = await authStore.initializeAuth();
+        setAuthInitialized(isAuthenticated);
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        setAuthInitialized(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -31,7 +56,7 @@ function App() {
           <Route
             path="/"
             element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
+              <PrivateRoute>
                 <Dashboard />
               </PrivateRoute>
             }
