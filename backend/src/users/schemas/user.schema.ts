@@ -4,7 +4,7 @@ import { HydratedDocument, Types } from 'mongoose';
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
-export class User {
+class User {
   // id?: string;
 
   @Prop({ required: true })
@@ -38,3 +38,4 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+export { User };

@@ -8,16 +8,28 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { JwtModule } from '@nestjs/jwt'; // Add this import
 import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [
+    AuthModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1 minute
         limit: 100, // 100 requests per minute
       },
     ]),
+    // Add JwtModule to AppModule
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('jwt.accessSecret'),
+        signOptions: { expiresIn: configService.get<string>('jwt.accessExpiration') },
+      }),
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
@@ -29,13 +41,16 @@ import { APP_GUARD } from '@nestjs/core';
       }),
     }),
     UsersModule,
-    AuthModule,
   ],
   controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
     },
     AppService,
   ],

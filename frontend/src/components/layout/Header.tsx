@@ -6,6 +6,8 @@ import {
   ArrowRightEndOnRectangleIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
+import { authStore } from '@/services/authStore';
+import { useNavigate } from 'react-router-dom';
 
 type HeaderProps = {
   activeTab: string;
@@ -15,6 +17,7 @@ type HeaderProps = {
 const Header: React.FC<HeaderProps> = ({ setActiveTab }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -30,6 +33,11 @@ const Header: React.FC<HeaderProps> = ({ setActiveTab }) => {
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
     setIsProfileOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await authStore.logout();
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -90,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({ setActiveTab }) => {
                     <span className="ml-2">Help</span>
                   </li>
                   <li
-                    onClick={() => console.log('Logout clicked')}
+                    onClick={() => handleLogout()}
                     className="flex items-center justify-center px-4 py-2 bg-red-700 hover:bg-red-800 cursor-pointer text-white"
                   >
                     <span className="mr-2">Log Out</span>

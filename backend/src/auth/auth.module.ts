@@ -6,17 +6,10 @@ import { AuthController } from './auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersModule } from '../users/users.module';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000, // 1 minute
-        limit: 5, // 5 requests per minute
-      },
-    ]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -26,18 +19,14 @@ import { APP_GUARD } from '@nestjs/core';
         signOptions: { expiresIn: configService.get<string>('jwt.accessExpiration') },
       }),
     }),
-    ConfigModule,
     UsersModule,
   ],
   controllers: [AuthController],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
     AuthService,
     JwtStrategy,
+    AuthGuard, // Keep as regular provider
   ],
-  exports: [AuthService],
+  exports: [AuthService, AuthGuard, JwtModule], // Export so AppModule can use it
 })
 export class AuthModule {}

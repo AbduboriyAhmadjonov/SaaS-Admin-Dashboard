@@ -3,10 +3,9 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { authStore } from './services/authStore';
 import Dashboard from './components/Dashboard';
-import Login from './components/ui/Login';
-import Register from './components/ui/Register';
-import PrivateRoute from './components/PrivateRoute';
-import './index.css';
+import Login from './components/pages/Login';
+import Register from './components/pages/Register';
+import PrivateRoute from './guards/PrivateRoute';
 import { useEffect, useState } from 'react';
 
 const queryClient = new QueryClient({

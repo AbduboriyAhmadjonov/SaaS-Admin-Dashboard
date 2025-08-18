@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import Sidebar from './Sidebar';
-import Header from './Header';
-import Overview from './Overview';
-import Users from './Users';
-import Revenue from './Revenue';
-import Analytics from './Analytics';
-import Settings from './Settings';
-import Profile from './Profile';
+import Sidebar from './layout/Sidebar';
+import Header from './layout/Header';
+import Overview from './pages/Overview';
+import Users from './pages/Users';
+import Revenue from './pages/Revenue';
+import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 // import Help from './Help';
 
 const Dashboard: React.FC = () => {

@@ -15,7 +15,7 @@ export default function Register() {
     try {
       await registerMutation.mutateAsync({ name, email, password });
       alert('Registered successfully');
-      navigate('/login'); // better UX: redirect to login
+      navigate('/login');
     } catch (err) {
       console.error(err);
       alert((err as Error).message);

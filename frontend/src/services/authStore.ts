@@ -1,4 +1,5 @@
 // services/authStore.ts
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 class AuthStore {
   private accessToken: string | null = null;
   private isInitializing = false;
@@ -46,17 +47,14 @@ class AuthStore {
 
   private async verifyToken(): Promise<boolean> {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/auth/verify`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
       return response.ok;
     } catch {
       return false;
@@ -65,16 +63,13 @@ class AuthStore {
 
   private async refreshTokenSilently(): Promise<boolean> {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/auth/refresh`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -91,16 +86,13 @@ class AuthStore {
 
   async refreshAccessToken(): Promise<{ accessToken: string } | null> {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/auth/refresh`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (!response.ok) {
         this.clearToken();
@@ -134,7 +126,7 @@ class AuthStore {
 
   async logout(): Promise<void> {
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/auth/logout`, {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
         headers: {

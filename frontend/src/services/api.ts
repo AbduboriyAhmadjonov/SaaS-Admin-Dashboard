@@ -1,7 +1,7 @@
 import { Stats, User, ChartDataPoint, PlanDistribution } from '@/types';
 import { authStore } from './authStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const buildHeaders = () => ({
   'Content-Type': 'application/json',
@@ -11,7 +11,7 @@ const buildHeaders = () => ({
 export const api = {
   async fetchWithAuth(url: string, options?: RequestInit): Promise<Response> {
     let attempt = 0;
-    const maxAttempts = 2;
+    const maxAttempts = 5;
 
     while (attempt < maxAttempts) {
       const headers = buildHeaders();
@@ -23,15 +23,13 @@ export const api = {
           credentials: 'include',
         });
 
-        // If unauthorized and we haven't tried refreshing yet
         if (response.status === 401 && attempt === 0) {
           attempt++;
 
           try {
             await authStore.refreshAccessToken();
-            continue; // Retry with new token
+            continue;
           } catch (refreshError) {
-            // Refresh failed, redirect to login
             authStore.clearToken();
             window.location.href = '/login';
             throw new Error('Session expired. Please log in again.');
@@ -54,7 +52,7 @@ export const api = {
   async postLogin(
     email: string,
     password: string
-  ): Promise<{ accessToken: string; csrfToken?: string }> {
+  ): Promise<{ accessToken: string; csrfToken: string }> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       credentials: 'include',
@@ -64,7 +62,11 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+
     if (!response.ok) {
+      console.log(`Login failed with status ${response.status}`);
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `Login failed with status ${response.status}`);
     }
@@ -74,7 +76,7 @@ export const api = {
 
   /** Register */
   async postRegister(name: string, email: string, password: string): Promise<User> {
-    const response = await this.fetchWithAuth(`${API_BASE_URL}/users/createUser`, {
+    const response = await this.fetchWithAuth(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
     });
