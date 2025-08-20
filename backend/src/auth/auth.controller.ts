@@ -44,11 +44,11 @@ export class AuthController {
     });
 
     const csrf = randomBytes(32).toString('hex');
-    res.cookie('csrf_token', csrf, { httpOnly: false, sameSite: 'lax', maxAge: 86400000 });
+    res.cookie('csrf_token', csrf, { httpOnly: false, sameSite: 'lax', maxAge: 15 * 60 * 1000 }); // 15 minutes
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       sameSite: 'lax',
-      maxAge: 604800000,
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     return { accessToken, csrfToken: csrf };
