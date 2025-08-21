@@ -13,7 +13,7 @@ export class UsersService {
     const isExist = await this.userModel.findOne({ email });
     if (isExist) throw new UnauthorizedException('Email already in use');
 
-    return new this.userModel(createUserDto).save(); // password already hashed in AuthService
+    return new this.userModel(createUserDto).save();
   }
 
   async findBySomething(field: string, value: string): Promise<UserDocument> {

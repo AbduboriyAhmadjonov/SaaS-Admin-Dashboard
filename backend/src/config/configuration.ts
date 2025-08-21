@@ -11,4 +11,5 @@ export default () => ({
   bcrypt: {
     saltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS!),
   },
+  re_send_api_key: process.env.RE_SEND_API_KEY!,
 });

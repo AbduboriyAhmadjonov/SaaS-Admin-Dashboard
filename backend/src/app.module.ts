@@ -11,6 +11,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { JwtModule } from '@nestjs/jwt'; // Add this import
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AuthGuard } from './auth/auth.guard';
       }),
     }),
     UsersModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [

@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { EmailService } from 'src/email/email.service';
+import { TokenType } from 'src/email/schemas/tokens.schema';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +13,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   private async hashToken(token: string) {
@@ -20,7 +23,27 @@ export class AuthService {
   /** Registration */
   async register(name: string, email: string, password: string) {
     const hashedPw = await bcrypt.hash(password, 10);
-    return this.usersService.create({ name, email, password: hashedPw });
+    const verificationToken = await this.emailService.generateVerificationToken();
+    const hashedToken = await this.hashToken(verificationToken);
+    const user = await this.usersService.create({
+      name,
+      email,
+      password: hashedPw,
+      isVerified: false,
+    });
+    if (!user) throw new UnauthorizedException('Registration failed');
+    await this.emailService.addVerificationTokenToDb({
+      email: email,
+      userId: user['_id'].toString(), // Using array notation to access _id
+      token: hashedToken,
+      type: true, // Adding the missing type field
+      typeVerificationToken: TokenType.VERIFY,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      verifiedAt: new Date(),
+    });
+    await this.emailService.sendVerificationEmail(email, verificationToken);
+
+    // return user;
   }
 
   /** Validation users */
@@ -31,7 +54,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, hashToCompare);
     console.log(`Password is: ${isMatch ? '' : 'not'} match`);
     if (!user || !isMatch) throw new UnauthorizedException('Invalid credentials');
-    return { email: user.email, _id: user._id };
+    return { email: user.email, _id: user['_id'] };
   }
 
   /** Login */
@@ -70,18 +93,18 @@ export class AuthService {
     if (!session) throw new UnauthorizedException('Token not found');
 
     // 2. rotate: remove old, add new
-    await this.usersService.removeTokens(user._id.toString(), session.sessionId);
+    await this.usersService.removeTokens(user['_id'].toString(), session.sessionId);
 
     const newAccess = this.jwtService.sign(
-      { email: user.email, sub: user._id },
+      { email: user.email, sub: user['_id'] },
       { secret: this.config.get<string>('jwt.accessSecret'), expiresIn: '15m' },
     );
     const newRefresh = this.jwtService.sign(
-      { email: user.email, sub: user._id },
+      { email: user.email, sub: user['_id'] },
       { secret: this.config.get<string>('jwt.refreshSecret'), expiresIn: '7d' },
     );
     const newHashed = await this.hashToken(newRefresh);
-    await this.usersService.addRefreshToken(user._id.toString(), newHashed);
+    await this.usersService.addRefreshToken(user['_id'].toString(), newHashed);
 
     return { accessToken: newAccess, newRefreshToken: newRefresh, user };
   }

@@ -5,8 +5,6 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 class User {
-  // id?: string;
-
   @Prop({ required: true })
   name: string;
 
@@ -15,6 +13,9 @@ class User {
 
   @Prop({ required: true })
   password: string;
+
+  @Prop({ required: true })
+  isVerified: boolean;
 
   @Prop({
     type: [
