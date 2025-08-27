@@ -7,6 +7,7 @@ import Login from './components/pages/Login';
 import Register from './components/pages/Register';
 import PrivateRoute from './guards/PrivateRoute';
 import { useEffect, useState } from 'react';
+import Verify from './components/pages/Verify';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,6 +63,7 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify" element={<Verify />} />
         </Routes>
       </Router>
       <ReactQueryDevtools initialIsOpen={false} />

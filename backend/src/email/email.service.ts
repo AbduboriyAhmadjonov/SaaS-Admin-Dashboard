@@ -31,7 +31,7 @@ export class EmailService {
         html: `<p>Please click the link below to verify your email:</p>
                <a href="http://localhost:5173/verify?token=${token}">Verify Email</a>`,
       });
-
+      console.log('Email sent successfully:', result);
       return result;
     } catch (error) {
       console.log('Error sending email:', error);
@@ -49,5 +49,10 @@ export class EmailService {
 
   async findToken(token: string) {
     return this.tokensModel.findOne({ token });
+  }
+
+  // Must delete before production
+  async deleteAllTokens() {
+    return this.tokensModel.deleteMany({});
   }
 }

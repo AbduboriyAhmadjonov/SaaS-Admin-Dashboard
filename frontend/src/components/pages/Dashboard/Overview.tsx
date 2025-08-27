@@ -10,7 +10,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import StatCard from '../ui/StatCard';
+import StatCard from '../../ui/StatCard';
 
 import { useStats, useChartData } from '@/hooks/useApi';
 

@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';
 import { AuthGuard } from '../auth/auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -24,5 +24,12 @@ export class UsersController {
   @Get('/findAll')
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
+  }
+
+  // Must delete before production
+  @Public()
+  @Get('deleteAll')
+  async deleteAll() {
+    return await this.usersService.deleteAll();
   }
 }

@@ -46,7 +46,7 @@ export class AuthService {
       registerUserDto.email,
       verificationToken,
     );
-    console.log(`Verification email sent: ${isSent}`);
+    console.log(`Verification email sent: ${isSent?.data}`);
     return user;
   }
 
@@ -54,10 +54,14 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findBySomething('email', email);
     console.log(`User found: ${user ? user.email : 'No user found'}`);
+
     const hashToCompare = user?.password ?? this.config.get('bcrypt.hash');
     const isMatch = await bcrypt.compare(password, hashToCompare);
     console.log(`Password is: ${isMatch ? '' : 'not'} match`);
+
     if (!user || !isMatch) throw new UnauthorizedException('Invalid credentials');
+    if (!user.isVerified) throw new UnauthorizedException('User is not verified');
+
     return { email: user.email, _id: user['_id'] };
   }
 

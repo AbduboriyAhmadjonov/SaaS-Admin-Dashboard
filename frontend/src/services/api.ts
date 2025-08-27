@@ -75,7 +75,8 @@ export const api = {
   },
 
   /** Register */
-  async postRegister(name: string, email: string, password: string): Promise<User> {
+  async postRegister(name: string, email: string, password: string) {
+    //: Promise<User>
     const response = await this.fetchWithAuth(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),

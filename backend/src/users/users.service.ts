@@ -3,10 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private emailService: EmailService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
@@ -30,6 +34,7 @@ export class UsersService {
   }
 
   async deleteAll() {
+    await this.emailService.deleteAllTokens();
     return this.userModel.deleteMany({});
   }
 

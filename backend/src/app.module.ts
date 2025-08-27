@@ -19,10 +19,9 @@ import { EmailModule } from './email/email.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute
+        limit: 10, // 10 requests per minute
       },
     ]),
-    // Add JwtModule to AppModule
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

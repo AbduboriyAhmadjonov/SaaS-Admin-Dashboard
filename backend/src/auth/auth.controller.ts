@@ -36,7 +36,7 @@ export class AuthController {
   }
 
   @Public()
-  @Post('login') // Need to add csrf
+  @Post('login')
   async login(
     @Body() body: { email: string; password: string },
     @Res({ passthrough: true }) res: Response,
@@ -124,26 +124,4 @@ export class AuthController {
 
     return { message: 'Email verified successfully!' };
   }
-
-  // @UseGuards(AuthGuard)
-  // @Post('logout')
-  // async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
-  //   const userId = req.user._id;
-  //   const refreshToken = req.cookies['refresh_token'];
-
-  //   if (refreshToken) {
-  //     const payload = this.jwtService.verify(refreshToken, {
-  //       secret: this.config.get<string>('jwt.refreshSecret'),
-  //     });
-  //     await this.authService.logout(payload.sub, refreshToken);
-  //   }
-  //   res.clearCookie('refresh_token');
-  //   return { message: 'Logged out' };
-  // }
-
-  // @UseGuards(AuthGuard)
-  // @Get('sessions')
-  // async getSessions(@Req() req: Request) {
-  //   return this.authService.getUserSessions(req.user._id);
-  // }
 }

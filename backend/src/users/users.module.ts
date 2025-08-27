@@ -5,6 +5,7 @@ import { UsersController } from './users.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { JwtModule } from '@nestjs/jwt/dist/jwt.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         signOptions: { expiresIn: configService.get<string>('jwt.accessExpiration') },
       }),
     }),
+    EmailModule, // Need to delete before production
   ],
   controllers: [UsersController],
   providers: [UsersService],
