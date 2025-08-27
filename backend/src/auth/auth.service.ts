@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from 'src/email/email.service';
 import { TokenType } from 'src/email/schemas/tokens.schema';
+import { RegisterUserDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,29 +22,32 @@ export class AuthService {
   }
 
   /** Registration */
-  async register(name: string, email: string, password: string) {
-    const hashedPw = await bcrypt.hash(password, 10);
+  async register(registerUserDto: RegisterUserDto) {
+    const hashedPw = await bcrypt.hash(registerUserDto.password, 10);
     const verificationToken = await this.emailService.generateVerificationToken();
     const hashedToken = await this.hashToken(verificationToken);
     const user = await this.usersService.create({
-      name,
-      email,
+      name: registerUserDto.name,
+      email: registerUserDto.email,
       password: hashedPw,
       isVerified: false,
     });
     if (!user) throw new UnauthorizedException('Registration failed');
     await this.emailService.addVerificationTokenToDb({
-      email: email,
-      userId: user['_id'].toString(), // Using array notation to access _id
+      email: registerUserDto.email,
+      userId: user['_id'].toString(),
       token: hashedToken,
-      type: true, // Adding the missing type field
+      type: true,
       typeVerificationToken: TokenType.VERIFY,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       verifiedAt: new Date(),
     });
-    await this.emailService.sendVerificationEmail(email, verificationToken);
-
-    // return user;
+    const isSent = await this.emailService.sendVerificationEmail(
+      registerUserDto.email,
+      verificationToken,
+    );
+    console.log(`Verification email sent: ${isSent}`);
+    return user;
   }
 
   /** Validation users */

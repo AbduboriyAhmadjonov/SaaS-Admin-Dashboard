@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
@@ -11,9 +11,9 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
     const isExist = await this.userModel.findOne({ email });
-    if (isExist) throw new UnauthorizedException('Email already in use');
+    if (isExist) throw new ConflictException('Email already in use');
 
-    return new this.userModel(createUserDto).save();
+    return await new this.userModel(createUserDto).save();
   }
 
   async findBySomething(field: string, value: string): Promise<UserDocument> {
@@ -21,6 +21,7 @@ export class UsersService {
     const user = await this.userModel.findOne({ [field]: value }).exec();
     if (!user) throw new Error(`Cannot find a user with ${field}: ${value}`);
     console.log('User found:', user);
+
     return user;
   }
 
@@ -46,6 +47,7 @@ export class UsersService {
       { _id: userId },
       { $push: { sessions: session } },
     );
+
     return result.modifiedCount > 0;
   }
 

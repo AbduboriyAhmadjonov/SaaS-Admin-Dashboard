@@ -8,10 +8,11 @@ import { AuthGuard } from '../auth/auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('/createUser')
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
-  }
+  // @UseGuards(AuthGuard)
+  // @Post('/users')
+  // async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+  //   return this.usersService.create(createUserDto);
+  // }
 
   @UseGuards(AuthGuard)
   @Post('/findByEmail')

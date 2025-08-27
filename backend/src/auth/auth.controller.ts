@@ -1,4 +1,13 @@
-import { Body, Controller, Post, UseGuards, Res, Req, UnauthorizedException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Query,
+  UseGuards,
+  Res,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
@@ -7,6 +16,8 @@ import { RegisterUserDto } from './dto/register.dto';
 import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { Public } from './decorators/public.decorator';
+import { EmailService } from 'src/email/email.service';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
@@ -14,16 +25,14 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly tokensService: EmailService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Public()
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto) {
-    return this.authService.register(
-      registerUserDto.name,
-      registerUserDto.email,
-      registerUserDto.password,
-    );
+    return this.authService.register(registerUserDto);
   }
 
   @Public()
@@ -99,6 +108,21 @@ export class AuthController {
     res.clearCookie('refresh_token');
     res.clearCookie('csrf_token');
     return { message: 'Logged out' };
+  }
+
+  @Public()
+  @Post('verify')
+  async verify(@Query('token') token: string) {
+    const tokenByUser = await this.tokensService.findToken(token);
+
+    if (!tokenByUser) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+    const user = await this.usersService.findBySomething('id', String(tokenByUser.userId));
+    user.isVerified = true;
+    await user.save();
+
+    return { message: 'Email verified successfully!' };
   }
 
   // @UseGuards(AuthGuard)
