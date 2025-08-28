@@ -37,7 +37,6 @@ export class AuthService {
       email: registerUserDto.email,
       userId: user['_id'].toString(),
       token: hashedToken,
-      type: true,
       typeVerificationToken: TokenType.VERIFY,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       verifiedAt: new Date(),

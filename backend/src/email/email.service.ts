@@ -3,9 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { randomBytes } from 'crypto';
 import { Resend } from 'resend';
-import { Tokens, TokensDocument } from './schemas/tokens.schema';
+import { Tokens, TokensDocument, TokenType } from './schemas/tokens.schema';
 import { Model } from 'mongoose';
 import { CreateTokensDto } from './dto/token.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class EmailService {
@@ -29,7 +30,7 @@ export class EmailService {
         to: email,
         subject: 'Verify your email',
         html: `<p>Please click the link below to verify your email:</p>
-               <a href="http://localhost:5173/verify?token=${token}">Verify Email</a>`,
+               <a href="http://localhost:5173/verify?token=${token}&email=${email}">Verify Email</a>`,
       });
       console.log('Email sent successfully:', result);
       return result;
@@ -47,8 +48,15 @@ export class EmailService {
     return isCreated ? true : false;
   }
 
-  async findToken(token: string) {
-    return this.tokensModel.findOne({ token });
+  async findUserByToken(token: string) {
+    const tokens = await this.tokensModel.find({ typeVerificationToken: TokenType.VERIFY });
+
+    for (const t of tokens) {
+      const isMatch = await bcrypt.compare(token, t.token);
+      if (isMatch) return t;
+    }
+
+    return null;
   }
 
   // Must delete before production

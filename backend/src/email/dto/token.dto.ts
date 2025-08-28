@@ -12,14 +12,11 @@ export class CreateTokensDto {
   @IsString()
   readonly token: string;
 
-  @IsBoolean()
-  readonly type: boolean;
+  @IsEnum(TokenType)
+  readonly typeVerificationToken: TokenType;
 
   @IsDate()
   readonly expiresAt: Date;
-
-  @IsEnum(TokenType)
-  readonly typeVerificationToken: TokenType;
 
   @IsDate()
   readonly verifiedAt: Date;

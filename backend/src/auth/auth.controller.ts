@@ -18,6 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Public } from './decorators/public.decorator';
 import { EmailService } from 'src/email/email.service';
 import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Controller('auth')
 export class AuthController {
@@ -113,15 +114,15 @@ export class AuthController {
   @Public()
   @Post('verify')
   async verify(@Query('token') token: string) {
-    const tokenByUser = await this.tokensService.findToken(token);
+    const tokenRecord = await this.tokensService.findUserByToken(token);
+    console.log('Token Record', tokenRecord);
+    if (!tokenRecord) throw new UnauthorizedException();
 
-    if (!tokenByUser) {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-    const user = await this.usersService.findBySomething('id', String(tokenByUser.userId));
+    const user = await this.usersService.findBySomething('_id', String(tokenRecord.userId));
+    console.log('User found:', user);
     user.isVerified = true;
     await user.save();
 
-    return { message: 'Email verified successfully!' };
+    return { success: 'Email verified successfully!' };
   }
 }
